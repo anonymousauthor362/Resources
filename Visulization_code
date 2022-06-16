@@ -1,0 +1,77 @@
+import numpy as np
+import scipy
+import scipy.ndimage as sd
+import matplotlib.pyplot as plt
+
+file1 = open('data.txt', 'r')
+
+result_lines = file1.readlines()
+
+count = 0
+result_data = []
+data_matrix = []
+for line in result_lines:  
+  data = line.split('\t')
+  if len(data) >= 20:
+    count+=1
+    data[-1] = data[-1].split('\n')[0]
+    data = list(map(lambda x: int(x), data[1:]))
+    data_matrix.append(data)
+    if(count == 30):
+      result_data.append(data_matrix)
+      data_matrix = []
+      count = 0
+  
+
+result_data = list(map(lambda x : np.array(x, dtype = float), result_data))
+
+figs = []
+
+i = 0
+
+for data in result_data:
+  data = sd.uniform_filter(data, 5)
+  figs.append(plt.imshow(data, cmap = 'Greys', interpolation = 'nearest'))
+  plt.savefig("img_{index}".format(index = i))
+  i = i + 1
+
+image_names = []
+
+for i in range(len(figs)):
+  image_names.append("img_{}.png".format(i))
+
+
+from moviepy.editor import *
+
+
+clip = ImageSequenceClip(image_names, fps = 3)
+
+
+clip.ipython_display(width = 720)
+
+result_data
+
+import json
+
+with open('mat_data') as f:
+  d = json.load(f)
+
+d.keys()
+
+for data in result_data:
+  objectDict = {}
+  objectDict['dateTime'] = "2021-09-13T18:32:40.3359732+02:00";
+  objectDict['pressureMatrix'] = data.tolist()
+  d['pressureData'].append(objectDict)
+
+d['pressureData']
+
+d['pressureData'][0]
+
+with open("test_file.json", "w") as write_file:
+    json.dump(d, write_file, indent=4)
+
+from google.colab import files
+
+for i in range(0,30):
+  files.download('img_{}.png'.format(i)) 
